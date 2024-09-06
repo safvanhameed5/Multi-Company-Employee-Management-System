@@ -15,7 +15,7 @@ const Login = () => {
 
     try {
       const response = await axios.post('/api/login/', {
-        username: username, // Use 'username' if your backend expects it instead of 'email'
+        username, // Use 'username' if your backend expects it instead of 'email'
         password,
       });
 
@@ -25,7 +25,11 @@ const Login = () => {
 
       navigate('/dashboard'); // Redirect to the dashboard after successful login
     } catch (err) {
-      setError('Invalid username or password');
+      if (err.response && err.response.status === 400) {
+        setError('Invalid username or password');
+      } else {
+        setError('An error occurred. Please try again later.');
+      }
     }
   };
 
@@ -34,8 +38,9 @@ const Login = () => {
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label>Username</label>
+          <label htmlFor="username">Username</label>
           <input
+            id="username"
             type="text"
             value={username}
             onChange={(e) => setUserName(e.target.value)}
@@ -43,8 +48,9 @@ const Login = () => {
           />
         </div>
         <div className="form-group">
-          <label>Password</label>
+          <label htmlFor="password">Password</label>
           <input
+            id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

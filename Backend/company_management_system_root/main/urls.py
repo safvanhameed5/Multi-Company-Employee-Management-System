@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import DepartmentViewSet, RoleViewSet, AttendanceViewSet, LeaveViewSet, CompanyViewSet, EmployeeViewSet
+from . import views
+from .views import DepartmentViewSet, RoleViewSet, AttendanceViewSet, LeaveViewSet, CompanyViewSet, EmployeeViewSet, login_user
 
 router = DefaultRouter()
 router.register(r'company', CompanyViewSet)
@@ -12,6 +13,7 @@ router.register(r'leave', LeaveViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('api/login/', views.login_user, name='login'),
 ]
 
 '''urlpatterns = [

@@ -1,4 +1,4 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import permission_classes, api_view
 from rest_framework.response import Response
 from rest_framework import viewsets
 from .models import Company, Employee, Attendance, LeaveRequest, Department, Role
@@ -6,6 +6,8 @@ from .serializers import CompanySerializer, EmployeeSerializer, AttendanceSerial
 from django.shortcuts import render,redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
 
 # Create your views here.
 '''@api_view(['GET','POST','PUT','PATCH','DELETE'])
@@ -75,19 +77,23 @@ def employee(request, id=None):
         obj = Employee.objects.get(id = id)
         obj.delete()
         return Response({"Message" : "Employee Deleted"})'''
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def login_user(request):
     if request.method == 'POST':
-        username = request.POST["username"]
-        password = request.POST["password"]
+        username = request.data.get('username')
+        password = request.data.get('password')
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            login(request, user)
-            return redirect('home')
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'username': user.username,
+            })
         else:
-            messages.success(request, ("There was an error loggin in, Try again."))
-            return redirect('login')
-    else:
-        return render(request, 'authenticate/login.html', {})
+            return Response({'error': 'Invalid credentials'}, status=400)
 
 class CompanyViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.all()
