@@ -1,133 +1,78 @@
-// src/pages/Departments.js
-import { useEffect, useState } from 'react';
-import axios from '../services/axiosConfig';
-import './Departments.css';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import './Departments.css'
 
-const Departments = () => {
+const ViewDepartments = () => {
   const [departments, setDepartments] = useState([]);
-  const [newDepartment, setNewDepartment] = useState({
-    name: '',
-    company: '',
-  });
-  const [editDepartment, setEditDepartment] = useState(null);
-  const [editName, setEditName] = useState('');
+
+  const { id } = useParams();
+
+  const navigate = useNavigate()
+
+  const fetchDep = () => {
+    axios.get('http://127.0.0.1:8000/department/')
+      .then(response => setDepartments(response.data))
+      .catch(error => console.error('Error fetching departments:', error));
+  }
 
   useEffect(() => {
-    fetchDepartments();
+    fetchDep()
   }, []);
 
-  const fetchDepartments = async () => {
-    try {
-      const response = await axios.get('/department/');
-      setDepartments(response.data);
-    } catch (error) {
-      console.error('Error fetching departments:', error);
-    }
-  };
+  const displayDepartment = (id) => {
+    navigate('/viewDep/'+id)
+  }
 
-  const handleAddDepartment = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('/department/', newDepartment);
-      setDepartments([...departments, response.data]);
-      setNewDepartment({ name: '', company: '' }); // Reset input fields after addition
-    } catch (error) {
-      console.error('Error adding department:', error);
-    }
-  };
+  const updateDepartment = (id) => {
+    navigate('/editDep/'+id)
+  }
 
-  const handleEditDepartment = async (id) => {
-    try {
-      await axios.put(`/department/${id}/`, { name: editName });
-      setDepartments(
-        departments.map((dept) =>
-          dept.id === id ? { ...dept, name: editName } : dept
-        )
-      );
-      setEditDepartment(null);
-      setEditName('');
-    } catch (error) {
-      console.error('Error editing department:', error);
-    }
-  };
-
-  const handleDeleteDepartment = async (id) => {
-    try {
-      await axios.delete(`/department/${id}/`);
-      setDepartments(departments.filter((dept) => dept.id !== id));
-    } catch (error) {
-      console.error('Error deleting department:', error);
+  const deleteDepartment = async (id) => {
+    if (window.confirm("Are you sure you want to delete this record?")) {
+      try {
+        await axios.delete(`http://127.0.0.1:8000/department/${id}/`);
+        alert('Department deleted successfully!');
+        fetchDep()
+      } catch (error) {
+        console.error('Error deleting department:', error);
+        alert('Failed to delete the department. Please try again.');
+      }
     }
   };
 
   return (
-    <div className="departments">
-      <h1>Departments</h1>
-      <div className="add-department">
-        <form onSubmit={handleAddDepartment}>
-          <input
-            type="text"
-            value={newDepartment.name}
-            onChange={(e) => setNewDepartment({ ...newDepartment, name: e.target.value })}
-            placeholder="Add new department"
-            required
-          />
-          {/* Optional: If you have a company input, add this */}
-          {/* <input
-            type="text"
-            value={newDepartment.company}
-            onChange={(e) => setNewDepartment({ ...newDepartment, company: e.target.value })}
-            placeholder="Company"
-          /> */}
-          <button type="submit">Add</button>
-        </form>
-      </div>
-      <table>
+    <div className="container">
+      <h2>Departments</h2>
+      <Link to="/createDep" className="btn btn-primary mb-2">Create Department</Link>
+      <table className="table table-bordered table-striped">
         <thead>
           <tr>
-            <th>Department Name</th>
-            <th>Actions</th>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Company</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
-          {departments.map((department) => (
-            <tr key={department.id}>
-              <td>
-                {editDepartment === department.id ? (
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                  />
-                ) : (
-                  department.name
-                )}
-              </td>
-              <td>
-                {editDepartment === department.id ? (
-                  <button onClick={() => handleEditDepartment(department.id)}>
-                    Save
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setEditDepartment(department.id);
-                      setEditName(department.name);
-                    }}
-                  >
-                    Edit
-                  </button>
-                )}
-                <button onClick={() => handleDeleteDepartment(department.id)}>
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
+          {
+            departments && departments.map(department => (
+              <tr key={department.id}>
+                <td>{department.id}</td>
+                <td>{department.name}</td>
+                <td>{department.company}</td>
+                <td>
+                  <button onClick={()=>displayDepartment(department.id)} className='btn btn-info'>View</button>
+                  <button onClick={()=>updateDepartment(department.id)} className='btn btn-primary'>Edit</button>
+                  <button onClick={()=>deleteDepartment(department.id)} className='btn btn-danger'>Delete</button>
+                </td>
+              </tr>
+            ))
+          }
         </tbody>
       </table>
     </div>
   );
 };
 
-export default Departments;
+export default ViewDepartments;

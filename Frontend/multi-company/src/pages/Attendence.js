@@ -1,13 +1,20 @@
-import './Attendence.css'
+import AttendancePieChart from '../components/AttendencePieChart';
+import LeavePieChart from '../components/LeavePieChart';
+import './Attendence.css';
 
 const Attendence = () => {
-    return (
-      <div className="attendence">
-        <h1>Attendence</h1>
-        <p>Welcome to the company management system!</p>
-        {/* Add charts, stats, etc. */}
+  return (
+    <div className="attendence">
+      <div>
+        <div>
+          <AttendancePieChart />
+        </div>
+        <div>
+          <LeavePieChart />
+        </div>
       </div>
-    );
-  };
-  
-  export default Attendence;  
+    </div>
+  );
+};
+
+export default Attendence;

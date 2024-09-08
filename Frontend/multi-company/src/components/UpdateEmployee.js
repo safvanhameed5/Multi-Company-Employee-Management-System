@@ -1,49 +1,64 @@
-import React, { useState } from "react";
-import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
-import './CreateEmployeeComponent.css'
+import axios from 'axios';
+import React, { useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
-const CreateEmployeeComponent = () => {
-  const data = {
-    name: "",
-    employee_id: "",
-    company: "", // ID of the company
-    department: "", // ID of the department
-    role: "", // ID of the role
-    joining_date: "", // should be in YYYY-MM-DD format
-    salary: "",
-  };
+const UpdateEmployee = () => {
 
-  const navigate = useNavigate()
+    const { id } = useParams();
 
-  const [employee, setEmployee] = useState(data);
+    const data = {
+        name: "",
+        employee_id: "",
+        company: "", // ID of the company
+        department: "", // ID of the department
+        role: "", // ID of the role
+        joining_date: "", // should be in YYYY-MM-DD format
+        salary: "",
+      };
+    
+      const navigate = useNavigate()
+    
+      const [employee, setEmployee] = useState(data);
 
-  // Update state when input changes
-  const handleInput = (e) => {
-    setEmployee({ ...employee, [e.target.name]: e.target.value });
-  };
+  //  const [empData, setEmpData] = useState({});
 
-  // Format date to YYYY-MM-DD before sending
-  const formatDate = (date) => {
-    if (!date) return "";
-    const formattedDate = new Date(date).toISOString().split("T")[0];
-    return formattedDate;
-  };
+    useEffect(() => {
+        fetchEmployees();
+    }, []);
 
-  // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
+    const fetchEmployees = async () => {
+        axios
+        .get(`http://127.0.0.1:8000/employee/${id}/`)
+        .then((response) => {
+            console.log(response.data);
+            setEmployee(response.data)
 
-    // Format the date correctly
-    const formattedEmployee = {
-      ...employee,
-      joining_date: formatDate(employee.joining_date),
+        })
+        .catch((error) => {
+            console.error("Error fetching employees:", error);
+        });
     };
 
-    axios
-      .post("http://127.0.0.1:8000/employee/", formattedEmployee)
+    const handleInput = (e) => {
+        setEmployee({ ...employee, [e.target.name]: e.target.value });
+    }
+
+    const formatDate = (date) => {
+        if (!date) return "";
+        const formattedDate = new Date(date).toISOString().split("T")[0];
+        return formattedDate;
+      };
+
+    const handleSubmit = () => {
+        const formattedEmployee = {
+            ...employee,
+            joining_date: formatDate(employee.joining_date),
+          };
+
+        axios
+      .put(`http://127.0.0.1:8000/employee/${id}/`, formattedEmployee)
       .then((response) => {
-        alert("New Employee Created")
+        alert("Employee Updated Successfully!")
         navigate('/employees')
       })
       .catch((err) => {
@@ -57,11 +72,11 @@ const CreateEmployeeComponent = () => {
           console.log("Error message:", err.message);
         }
       });
-  };
+    }
 
   return (
-    <div className="container-dev">
-      <h2>Create Employee</h2>
+    <div className='container-dev'>
+      <h2>Update Employee</h2>
       <form onSubmit={handleSubmit}>
         <label className="form-label">Name</label>
         <input
@@ -140,7 +155,7 @@ const CreateEmployeeComponent = () => {
 
         <div>
           <button className="btn btn-success" type="submit">
-            Save
+            Update
           </button>
           <Link to="/employees" className="btn btn-danger">
             Back
@@ -148,7 +163,7 @@ const CreateEmployeeComponent = () => {
         </div>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default CreateEmployeeComponent;
+export default UpdateEmployee

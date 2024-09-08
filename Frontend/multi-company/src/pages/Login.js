@@ -22,7 +22,9 @@ const Login = () => {
       // Assuming the backend returns 'access' and 'refresh' tokens
       localStorage.setItem('accessToken', response.data.access);
       localStorage.setItem('refreshToken', response.data.refresh);
-
+      localStorage.setItem('userName', response.data.username);
+      console.log(response.data.username)
+      
       navigate('/dashboard'); // Redirect to the dashboard after successful login
     } catch (err) {
       if (err.response && err.response.status === 400) {

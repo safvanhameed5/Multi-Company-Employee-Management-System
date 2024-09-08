@@ -1,40 +1,56 @@
 import React, { useEffect, useState } from 'react'
-import EmployeeService from '../services/axiosConfig';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import './Employees.css'
 
 const ListEmployeeComponent = () => {
-    const [employees, setEmployees] = useState([]);
+  const [employees, setEmployees] = useState([]);
 
-    useEffect(() => {
-        getAllEmployees();
-        
-    }, [])
+  const navigate = useNavigate();
 
-    const deleteEmployee = (empId) => {
-      //console.log(empId);
-      EmployeeService.deleteEmployeeById(empId).then((response) => {
-        
-        getAllEmployees();
-        
-      }).catch(error => {
-        console.log(error);
-      })
-    }
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
 
-    const getAllEmployees = () => {
-      EmployeeService.getAllEmployees().then((response) => {
-        setEmployees(response.data);
-        //console.log(response.data)
-      }).catch(error => {
-          console.log(error);
-      })
+  const DisplayEmployee = (id) => {
+    navigate('/view/'+id)
   }
+
+  const UpdateEmployee = (id) => {
+    navigate('/edit/'+id)
+  }
+
+  const DeleteEmployee = async (id) => {
+    if (window.confirm("Are you sure you want to delete this record?")) {
+      try {
+        await axios.delete(`http://127.0.0.1:8000/employee/${id}/`);
+        alert('Employee deleted successfully!');
+        fetchEmployees(); // Refresh the list after deletion
+      } catch (error) {
+        console.error('Error deleting employee:', error);
+        alert('Failed to delete the employee. Please try again.');
+      }
+    }
+  };
+    
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/employee/');
+      setEmployees(response.data);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+    }
+  };
+
+
 
   return (
     <div className="container">
-      <h2 className="text-center">List Employees</h2>
+      <h2 className="text-center">Employee List</h2>
+      <Link to="/create" className="btn btn-primary mb-2">Create Employee</Link>
       <table className="table table-bordered table-striped">
         <thead>
+          <tr>
             <th>Name</th>
             <th>EID</th>
             <th>Company</th>
@@ -43,30 +59,31 @@ const ListEmployeeComponent = () => {
             <th>Joined</th>
             <th>Salary</th>
             <th>Action</th>
+          </tr>
         </thead>
         <tbody>
-            {
-                employees.map(employee =>
-                    <tr key = {employee.id}>
-                        <td>{employee.name}</td>
-                        <td>{employee.employee_id}</td>
-                        <td>{employee.company}</td>
-                        <td>{employee.department}</td>
-                        <td>{employee.role}</td>
-                        <td>{employee.joining_date}</td>
-                        <td>{employee.salary}</td>
-                        <td>
-                          <Link to={`/edit-employee/${employee.id}`} className='btn btn-info'>Edit</Link>
-                          <button onClick={() => deleteEmployee(employee.id)} className='btn btn-danger' style={{marginLeft:"10px"}}>Delete</button>
-                        </td>
-                    </tr>
-                )
-            }
+          {
+            employees && employees.map(employee => (
+              <tr key={employee.id}>
+                <td>{employee.name}</td>
+                <td>{employee.employee_id}</td>
+                <td>{employee.company}</td>
+                <td>{employee.department}</td>
+                <td>{employee.role}</td>
+                <td>{employee.joining_date}</td>
+                <td>{employee.salary}</td>
+                <td>
+                  <button onClick={ () => DisplayEmployee(employee.id) } className='btn btn-info'>View</button>
+                  <button onClick={ () => UpdateEmployee(employee.id) } className='btn btn-primary'>Edit</button>
+                  <button onClick={ () => DeleteEmployee(employee.id)} className='btn btn-danger'>Delete</button>
+                </td>
+              </tr>
+            ))
+          }
         </tbody>
       </table>
-      <Link to="/create" className="btn btn-primary mb-2">Create Employee</Link>
     </div>
-  )
+  );
 }
 
 export default ListEmployeeComponent

@@ -8,6 +8,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
 
 # Create your views here.
 '''@api_view(['GET','POST','PUT','PATCH','DELETE'])
@@ -118,3 +120,18 @@ class AttendanceViewSet(viewsets.ModelViewSet):
 class LeaveViewSet(viewsets.ModelViewSet):
     queryset = LeaveRequest.objects.all()
     serializer_class = LeaveRequestSerializer
+
+@api_view(['GET'])
+def attendance_summary(request):
+    present = Attendance.objects.filter(clock_in__isnull=False, clock_out__isnull=False).count()
+    absent = Attendance.objects.filter(clock_in__isnull=True, clock_out__isnull=True).count()
+    late = Attendance.objects.filter(clock_in__hour__gt=9).count()  # Example for late after 9 AM
+    print(request.user)
+    return Response({'present': present, 'absent': absent, 'late': late})
+
+@api_view(['GET'])
+def leave_summary(request):
+    pending = LeaveRequest.objects.filter(status='Pending').count()
+    approved = LeaveRequest.objects.filter(status='Approved').count()
+    rejected = LeaveRequest.objects.filter(status='Rejected').count()
+    return Response({'pending': pending, 'approved': approved, 'rejected': rejected})
