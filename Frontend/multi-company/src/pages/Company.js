@@ -11,6 +11,8 @@ const getLoggedInUser = () => {
 const Company = () => {
   const [company, setCompany] = useState([]);
 
+  const [search, setSearch] = useState('');
+
   const navigate = useNavigate();
 
   const displayCompany = (id) => {
@@ -43,6 +45,17 @@ const Company = () => {
       <Link to="/create" className="btn btn-primary mb-2">
         Create Company
       </Link>
+      <div className="searchBox">
+        <div className="input-group-prepend"></div>
+        <input
+          type="text"
+          onChange={(e) => setSearch(e.target.value)}
+          class="form-control"
+          placeholder="Search"
+          aria-label="Username"
+          aria-describedby="basic-addon1"
+        />
+      </div>
       <table className="table table-bordered table-striped">
         <thead>
           <tr>
@@ -55,7 +68,11 @@ const Company = () => {
         </thead>
         <tbody>
           {company &&
-            company.map((com) => (
+            company.filter((com) => {
+              return search.toLowerCase() === ""
+                ? com
+                : com.name.toLowerCase().includes(search);
+            }).map((com) => (
               <tr key={com.id}>
                 <td>{com.name}</td>
                 <td>{com.address}</td>

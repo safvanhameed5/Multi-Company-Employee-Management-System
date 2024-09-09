@@ -8,6 +8,8 @@ const ViewDepartments = () => {
 
   const { id } = useParams();
 
+  const [search, setSearch] = useState('');
+
   const navigate = useNavigate()
 
   const fetchDep = () => {
@@ -45,6 +47,17 @@ const ViewDepartments = () => {
     <div className="container">
       <h2>Departments</h2>
       <Link to="/createDep" className="btn btn-primary mb-2">Create Department</Link>
+      <div className="searchBox">
+        <div className="input-group-prepend"></div>
+        <input
+          type="text"
+          onChange={(e) => setSearch(e.target.value)}
+          class="form-control"
+          placeholder="Search"
+          aria-label="Username"
+          aria-describedby="basic-addon1"
+        />
+      </div>
       <table className="table table-bordered table-striped">
         <thead>
           <tr>
@@ -56,7 +69,11 @@ const ViewDepartments = () => {
         </thead>
         <tbody>
           {
-            departments && departments.map(department => (
+            departments && departments.filter((department) => {
+              return search.toLowerCase() === ""
+                ? department
+                : department.name.toLowerCase().includes(search);
+            }).map(department => (
               <tr key={department.id}>
                 <td>{department.id}</td>
                 <td>{department.name}</td>
