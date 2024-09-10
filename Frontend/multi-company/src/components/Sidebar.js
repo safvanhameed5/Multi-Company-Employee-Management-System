@@ -1,7 +1,16 @@
 import React from "react";
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import './Sidebar.css'
 
 const Sidebar = () => {
+
+  const navigate = useNavigate()
+
+  const logout = () => {
+    localStorage.clear()
+    navigate('/')
+  }
+
   return (
     <div>
       <nav className="navbar navbar-expand-lg bg-body-tertiary">
@@ -36,6 +45,9 @@ const Sidebar = () => {
               </Link>
               <Link className="nav-link" to="/attendence">
                 Attendence
+              </Link>
+              <Link className="nav-link" id="logout" onClick={()=>logout()} to="/">
+                Logout
               </Link>
             </div>
           </div>
